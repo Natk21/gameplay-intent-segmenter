@@ -13,10 +13,13 @@ app.mount(
     name="videos"
 )
 
-# Allow frontend dev server to call backend locally
+# Allow frontend dev server and production frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://gameplay-intent-segmenter-de8g2m4g4-natans-projects-0ec66935.vercel.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
