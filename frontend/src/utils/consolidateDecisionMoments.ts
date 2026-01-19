@@ -271,6 +271,9 @@ function buildConsolidatedMoment(
     hesitation: true,
     confidence,
     transition_count: group.length,
+    signal_intensity: 0,
+    within_clip_percentile: 0,
+    comparative_label: "normal",
     explanation:
       "Repeated switching between phases over a short period suggests uncertainty.",
   };
