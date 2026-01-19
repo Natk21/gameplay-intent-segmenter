@@ -231,7 +231,8 @@ export function applyLearnedConfidence<
 
   const phaseBundle = trainPhaseModels(rows, 5);
 
-  const learnedMoments = moments.map((moment, index) => {
+  const learnedMoments: Array<T & LearnedConfidenceMoment> = moments.map(
+    (moment, index) => {
       const phase = normalizePhaseLabel(phaseContexts[index]);
       const features = extractDecisionFeatures(moment, context);
       const model = phaseBundle.models[phase];
@@ -239,9 +240,8 @@ export function applyLearnedConfidence<
       const score = model
         ? clamp(predictConfidence(features, model), 0.05, 0.95)
         : moment.confidence_score ?? 0;
-      const confidence_source = usesLearned
-        ? "learned_phase_model"
-        : "heuristic_fallback";
+      const confidence_source: LearnedConfidenceMoment["confidence_source"] =
+        usesLearned ? "learned_phase_model" : "heuristic_fallback";
       updateConfidenceStats(phaseBundle.confidenceStats, phase, score);
       const confidence_breakdown = model
         ? buildBreakdown(features, model)
@@ -266,7 +266,8 @@ export function applyLearnedConfidence<
         ),
         confidence_breakdown,
       };
-    });
+    }
+  );
 
   (["explore", "execute", "hesitate", "unknown"] as const).forEach(
     (phase) => {
