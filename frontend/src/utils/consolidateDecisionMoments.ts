@@ -34,6 +34,7 @@ type BaseTransition = {
   hesitation?: boolean;
   confidence_level?: ConfidenceLevel;
   confidence_score?: number;
+  heuristic_confidence_score?: number;
   confidence_reason?: string;
 };
 
