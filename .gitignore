@@ -1,0 +1,23 @@
+.DS_Store
+.env
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Node/Next
+node_modules/
+.next/
+dist/
+build/
+coverage/
+
+# Local data/uploads and generated media
+backend/data/
+backend/data/uploads/
+frontend/public/previews/*.mp4
+frontend/public/previews/*.jpg
