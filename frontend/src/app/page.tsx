@@ -48,7 +48,6 @@ export default function Home() {
                 </p>
               </div>
               <MotionPreview
-                src="/previews/upload.mp4"
                 alt="Uploading a gameplay clip for analysis"
               />
             </div>
@@ -56,7 +55,6 @@ export default function Home() {
             <div className="grid gap-6 lg:grid-cols-2 lg:items-center">
               <div className="order-2 lg:order-1">
                 <MotionPreview
-                  src="/previews/phases.mp4"
                   poster="/previews/phases.png"
                   alt="Intent timeline showing explore, execute, and outcome phases"
                 />
@@ -83,7 +81,6 @@ export default function Home() {
                 </p>
               </div>
               <MotionPreview
-                src="/previews/decision-moments.mp4"
                 poster="/previews/decision-moments.png"
                 alt="Decision moments being highlighted in the timeline"
               />
@@ -92,7 +89,6 @@ export default function Home() {
             <div className="grid gap-6 lg:grid-cols-2 lg:items-center">
               <div className="order-2 lg:order-1">
                 <MotionPreview
-                  src="/previews/signal-analysis.mp4"
                   poster="/previews/signal-analysis.png"
                   alt="Signal analysis chart explaining why intent changes were detected"
                 />

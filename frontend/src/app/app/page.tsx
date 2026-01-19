@@ -78,6 +78,11 @@ export default function AppPage() {
   const loggedGlobalStatsJobIdRef = useRef<string | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [videoDuration, setVideoDuration] = useState<number | null>(null);
+  const apiBase = useMemo(() => {
+    const base =
+      process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+    return base.replace(/\/$/, "");
+  }, []);
   function getActiveSegment(segments: any[], t: number) {
     return segments.find(
       (s) => t >= s.start && t < s.end
@@ -125,7 +130,7 @@ export default function AppPage() {
     formData.append("file", file);
 
     try {
-      const res = await fetch("http://localhost:8000/api/upload", {
+      const res = await fetch(`${apiBase}/api/upload`, {
         method: "POST",
         body: formData,
       });
@@ -157,9 +162,7 @@ export default function AppPage() {
   async function pollJob(jobId: string) {
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(
-          `http://localhost:8000/api/job/${jobId}`
-        );
+        const res = await fetch(`${apiBase}/api/job/${jobId}`);
         if (!res.ok) {
           throw new Error(`Job fetch failed: ${res.status}`);
         }
@@ -193,6 +196,14 @@ export default function AppPage() {
   console.log("JOB RESULT:", job?.result);
 
   const rawSegments = job?.result?.segments ?? [];
+  const videoUrl = useMemo(() => {
+    const url = job?.result?.video?.url;
+    if (!url) return null;
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      return url;
+    }
+    return `${apiBase}${url}`;
+  }, [apiBase, job?.result?.video?.url]);
   const segments = useMemo(() => {
     if (!rawSegments.length) return rawSegments;
     return applyLearnedSegmentConfidence(
@@ -593,7 +604,7 @@ export default function AppPage() {
                 <div className="relative rounded border overflow-hidden">
                   <video
                     ref={videoRef}
-                    src={`http://localhost:8000${job.result.video.url}`}
+                    src={videoUrl ?? undefined}
                     controls
                     className="w-full"
                     onLoadedMetadata={() => {

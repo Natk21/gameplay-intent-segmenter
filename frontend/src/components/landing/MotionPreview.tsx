@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 type MotionPreviewProps = {
-  src: string;
+  src?: string;
   poster?: string;
   alt: string;
 };
@@ -38,7 +38,7 @@ export default function MotionPreview({ src, poster, alt }: MotionPreviewProps) 
   const sharedClassName =
     "w-full h-auto rounded-xl border border-white/10 shadow-lg bg-black/40";
 
-  if (reducedMotion) {
+  if (reducedMotion || !src) {
     if (poster) {
       return (
         <img

@@ -97,22 +97,24 @@ describe("How it works section", () => {
   it("wires motion previews for each step", () => {
     render(<Home />);
 
-    expect(
-      screen.getByLabelText("Uploading a gameplay clip for analysis")
-    ).toHaveAttribute("src", "/previews/upload.mp4");
+    const uploadPreview = screen.getByLabelText(
+      "Uploading a gameplay clip for analysis"
+    );
+    expect(uploadPreview).toBeInTheDocument();
+    expect(uploadPreview.tagName.toLowerCase()).toBe("div");
     expect(
       screen.getByLabelText(
         "Intent timeline showing explore, execute, and outcome phases"
       )
-    ).toHaveAttribute("src", "/previews/phases.mp4");
+    ).toHaveAttribute("src", "/previews/phases.png");
     expect(
       screen.getByLabelText("Decision moments being highlighted in the timeline")
-    ).toHaveAttribute("src", "/previews/decision-moments.mp4");
+    ).toHaveAttribute("src", "/previews/decision-moments.png");
     expect(
       screen.getByLabelText(
         "Signal analysis chart explaining why intent changes were detected"
       )
-    ).toHaveAttribute("src", "/previews/signal-analysis.mp4");
+    ).toHaveAttribute("src", "/previews/signal-analysis.png");
   });
 });
 
