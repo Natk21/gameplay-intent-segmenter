@@ -48,6 +48,10 @@ export type ConsolidatedDecisionMoment = BaseTransition & {
   signal_intensity: number;
   within_clip_percentile: number;
   comparative_label: ComparativeLabel;
+  normalized_duration?: number;
+  normalized_transition_rate?: number;
+  normalized_volatility?: number;
+  normalized_signal_intensity?: number;
 };
 
 type DecisionConfidenceInput = {
