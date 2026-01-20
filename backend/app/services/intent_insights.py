@@ -51,9 +51,15 @@ def derive_transitions(segments):
 
         t = curr["start"]
 
+        prev_conf = prev.get("confidence")
+        curr_conf = curr.get("confidence")
+        confidence_gap = None
+        if isinstance(prev_conf, (int, float)) and isinstance(curr_conf, (int, float)):
+            confidence_gap = abs(prev_conf - curr_conf)
+
         hesitation = (
             prev["phase"] == curr["phase"] or
-            abs(prev["confidence"] - curr["confidence"]) < 0.15
+            (confidence_gap is not None and confidence_gap < 0.15)
         )
 
         transitions.append({
@@ -62,7 +68,9 @@ def derive_transitions(segments):
             "from_phase": prev["phase"],
             "to_phase": curr["phase"],
             "hesitation": hesitation,
-            "confidence": min(prev["confidence"], curr["confidence"]),
+            "confidence": min(prev_conf, curr_conf)
+            if confidence_gap is not None
+            else None,
             "why": (
                 "Phase boundary with unstable confidence"
                 if hesitation

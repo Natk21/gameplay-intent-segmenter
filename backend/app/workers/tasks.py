@@ -23,7 +23,7 @@ def _ensure_segment_ids_and_fields(segments: List[Dict[str, Any]]) -> List[Dict[
     """
     Ensure every segment has:
       - id (stable for UI selection)
-      - confidence (float 0-1)
+      - confidence (float 0-1) when provided by the pipeline
       - dominant_signals (list[str])
       - explanation (string)
     Your existing segment_intent_phases() may already return some of these.
@@ -42,10 +42,10 @@ def _ensure_segment_ids_and_fields(segments: List[Dict[str, Any]]) -> List[Dict[
         seg["phase"] = str(seg["phase"])
 
         # Optional fields (filled if missing)
-        if "confidence" not in seg or seg["confidence"] is None:
-            seg["confidence"] = 0.75  # placeholder until Phase 2 scoring
-        else:
+        if "confidence" in seg and seg["confidence"] is not None:
             seg["confidence"] = float(seg["confidence"])
+        else:
+            seg["confidence"] = None
 
         if "dominant_signals" not in seg or seg["dominant_signals"] is None:
             seg["dominant_signals"] = []  # will become meaningful in Phase 2
@@ -62,6 +62,12 @@ def _segments_to_transitions(segments: List[Dict[str, Any]],
     transitions = []
     t = signals["t"]
     motion = signals.get("motion_smooth") or signals.get("motion_raw")
+    max_segment_duration = 0.0
+    for seg in segments:
+        max_segment_duration = max(
+            max_segment_duration,
+            float(seg.get("end", 0.0)) - float(seg.get("start", 0.0))
+        )
 
     for i in range(len(segments) - 1):
         a = segments[i]
@@ -72,10 +78,18 @@ def _segments_to_transitions(segments: List[Dict[str, Any]],
             t, motion, boundary_time
         )
 
-        # Simple confidence heuristic
-        confidence = min(a["confidence"], b["confidence"])
-        if motion_delta is not None:
-            confidence = min(1.0, confidence + abs(motion_delta))
+        # Confidence heuristic derived from signal + segment stability.
+        duration_a = float(a.get("end", 0.0)) - float(a.get("start", 0.0))
+        duration_b = float(b.get("end", 0.0)) - float(b.get("start", 0.0))
+        duration_floor = min(duration_a, duration_b)
+        duration_score = (
+            duration_floor / max_segment_duration
+            if max_segment_duration > 0
+            else 0.0
+        )
+        motion_score = abs(motion_delta) if motion_delta is not None else 0.0
+        confidence = max(duration_score, motion_score)
+        confidence = min(1.0, max(0.0, confidence))
 
         # Classify change type
         if motion_delta is not None and motion_delta > 0.25:

@@ -1,3 +1,4 @@
+import os
 from typing import Dict, List, Tuple
 
 import numpy as np
@@ -120,7 +121,7 @@ def _emission_score(
     return -2.0
 
 
-def _transition_penalty(prev: str, curr: str) -> float:
+def _transition_penalty(prev: str, curr: str, scale: float = 1.0) -> float:
     if prev == curr:
         return 0.0
 
@@ -136,7 +137,7 @@ def _transition_penalty(prev: str, curr: str) -> float:
         ("Outcome", "Execute"): 2.5,
         ("Execute", "Explore"): 2.0,
     }
-    return penalties.get((prev, curr), 1.5)
+    return penalties.get((prev, curr), 1.5) * scale
 
 
 def segment_intent_phases(
@@ -157,12 +158,45 @@ def segment_intent_phases(
     - Outcome: motion collapse after execution
     """
 
-    # These constants define a stable, deterministic DP pipeline.
-    ROLLING_WINDOW = 7
-    MIN_EXPLORE_S = 2.0
-    MIN_PURSUE_S = 1.2
-    MIN_EXECUTE_S = 0.5
-    MIN_OUTCOME_S = 0.8
+    granularity = os.getenv("INTENT_GRANULARITY", "normal").lower()
+    presets = {
+        "coarse": {
+            "rolling_window": 7,
+            "min_explore_s": 2.2,
+            "min_pursue_s": 1.4,
+            "min_execute_s": 0.6,
+            "min_outcome_s": 0.9,
+            "flicker_s": 0.9,
+            "penalty_scale": 1.2,
+        },
+        "normal": {
+            "rolling_window": 5,
+            "min_explore_s": 1.6,
+            "min_pursue_s": 1.0,
+            "min_execute_s": 0.5,
+            "min_outcome_s": 0.7,
+            "flicker_s": 0.6,
+            "penalty_scale": 1.0,
+        },
+        "fine": {
+            "rolling_window": 3,
+            "min_explore_s": 1.0,
+            "min_pursue_s": 0.8,
+            "min_execute_s": 0.4,
+            "min_outcome_s": 0.5,
+            "flicker_s": 0.4,
+            "penalty_scale": 0.8,
+        },
+    }
+    preset = presets.get(granularity, presets["normal"])
+
+    ROLLING_WINDOW = preset["rolling_window"]
+    MIN_EXPLORE_S = preset["min_explore_s"]
+    MIN_PURSUE_S = preset["min_pursue_s"]
+    MIN_EXECUTE_S = preset["min_execute_s"]
+    MIN_OUTCOME_S = preset["min_outcome_s"]
+    FLICKER_THRESHOLD_S = preset["flicker_s"]
+    PENALTY_SCALE = preset["penalty_scale"]
 
     if not times or not motion:
         return []
@@ -260,7 +294,7 @@ def segment_intent_phases(
                     + _emission_score(
                         curr, m, prev, thresholds, i_t, e_t, has_multisignal
                     )
-                    - _transition_penalty(prev, curr)
+                    - _transition_penalty(prev, curr, PENALTY_SCALE)
                 )
                 if score > best_score:
                     best_score = score
@@ -346,7 +380,7 @@ def segment_intent_phases(
     }
     segments = _merge_short_segments(segments, mins)
 
-    # Remove A -> B -> A flicker patterns (B < 0.8s), repeat until stable.
+    # Remove A -> B -> A flicker patterns (short middle segment), repeat until stable.
     flicker_changed = True
     while flicker_changed:
         flicker_changed = False
@@ -356,7 +390,7 @@ def segment_intent_phases(
             seg = segments[i]
             next_seg = segments[i + 1]
             if prev_seg["phase"] == next_seg["phase"] and prev_seg["phase"] != seg["phase"]:
-                if (seg["end"] - seg["start"]) < 0.8:
+                if (seg["end"] - seg["start"]) < FLICKER_THRESHOLD_S:
                     prev_seg["end"] = next_seg["end"]
                     prev_seg["why"] = append_note(
                         prev_seg["why"],
