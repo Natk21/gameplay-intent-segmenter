@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function Home() {
-  const previewVideoBase = process.env.NEXT_PUBLIC_PREVIEW_VIDEO_BASE_URL;
-  const previewVideo = previewVideoBase
-    ? (path: string) => `${previewVideoBase.replace(/\/$/, "")}${path}`
-    : null;
+  const previewVideoBase = process.env.NEXT_PUBLIC_PREVIEW_VIDEO_BASE_URL ?? "";
+  const previewVideo = (path: string) =>
+    previewVideoBase
+      ? `${previewVideoBase.replace(/\/$/, "")}${path}`
+      : path;
 
   return (
     <main className="bg-background text-foreground">
@@ -53,7 +54,7 @@ export default function Home() {
                 </p>
               </div>
               <MotionPreview
-                src={previewVideo ? previewVideo("/previews/upload.mp4") : undefined}
+                src={previewVideo("/previews/upload.mp4")}
                 alt="Uploading a gameplay clip for analysis"
                 forceVideo
               />
@@ -62,7 +63,7 @@ export default function Home() {
             <div className="grid gap-6 lg:grid-cols-2 lg:items-center">
               <div className="order-2 lg:order-1">
                 <MotionPreview
-                  src={previewVideo ? previewVideo("/previews/phases.mp4") : undefined}
+                  src={previewVideo("/previews/phases.mp4")}
                   poster="/previews/phases.png"
                   alt="Intent timeline showing explore, execute, and outcome phases"
                   forceVideo
@@ -90,7 +91,7 @@ export default function Home() {
                 </p>
               </div>
               <MotionPreview
-                src={previewVideo ? previewVideo("/previews/decision-moments.mp4") : undefined}
+                src={previewVideo("/previews/decision-moments.mp4")}
                 poster="/previews/decision-moments.png"
                 alt="Decision moments being highlighted in the timeline"
                 forceVideo
@@ -100,7 +101,7 @@ export default function Home() {
             <div className="grid gap-6 lg:grid-cols-2 lg:items-center">
               <div className="order-2 lg:order-1">
                 <MotionPreview
-                  src={previewVideo ? previewVideo("/previews/signal-analysis.mp4") : undefined}
+                  src={previewVideo("/previews/signal-analysis.mp4")}
                   poster="/previews/signal-analysis.png"
                   alt="Signal analysis chart explaining why intent changes were detected"
                   forceVideo
