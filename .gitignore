@@ -20,3 +20,5 @@ coverage/
 backend/data/
 backend/data/uploads/
 frontend/public/previews/*.mp4
+datasets/intent_segmentation_v1/media/
+*.mp4
