@@ -17,8 +17,10 @@ from app.ml.features.audio_features import compute_audio_features
 from app.services.learned_intent_segmentation import (
     align_signal,
     load_default_model_bundle,
+    load_model_bundle,
     segment_intent_phases_model,
 )
+from app.services.model_store import download_model_if_needed
 
 
 # ----------------------------
@@ -325,7 +327,11 @@ def run_analysis_job(job_id: str, storage_backend: str, storage_key: str):
         })
 
         # 5) Segment phases
-        model_bundle = load_default_model_bundle()
+        model_paths = download_model_if_needed()
+        if model_paths is not None:
+            model_bundle = load_model_bundle(*model_paths)
+        else:
+            model_bundle = load_default_model_bundle()
         if model_bundle is not None:
             segments = segment_intent_phases_model(
                 motion_t,
