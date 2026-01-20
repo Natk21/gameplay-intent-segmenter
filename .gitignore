@@ -20,4 +20,3 @@ coverage/
 backend/data/
 backend/data/uploads/
 frontend/public/previews/*.mp4
-frontend/public/previews/*.jpg
