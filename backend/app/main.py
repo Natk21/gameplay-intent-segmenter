@@ -17,13 +17,20 @@ app.mount(
     name="videos"
 )
 
-# Allow frontend dev server and production frontend
+def _parse_allowed_origins() -> list[str]:
+    raw = os.getenv("ALLOWED_ORIGINS", "")
+    if not raw.strip():
+        return ["http://localhost:3000"]
+    return [origin.strip() for origin in raw.split(",") if origin.strip()]
+
+
+# Allow frontend dev server, Vercel previews, and configured origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "https://gameplay-intent-segmenter-de8g2m4g4-natans-projects-0ec66935.vercel.app",
-    ],
+    allow_origins=_parse_allowed_origins(),
+    allow_origin_regex=os.getenv(
+        "ALLOWED_ORIGIN_REGEX", r"https://.*\.vercel\.app"
+    ),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
