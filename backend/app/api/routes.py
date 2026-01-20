@@ -5,6 +5,11 @@ from dotenv import load_dotenv
 
 from app.core.schemas import JobCreateResponse, JobStatusResponse
 from app.services.job_store import write_job, read_job
+from app.services.object_store import (
+    r2_enabled,
+    upload_bytes,
+    get_public_url,
+)
 from app.workers.tasks import run_analysis_job
 
 load_dotenv()
@@ -22,12 +27,28 @@ def health():
 async def upload_video(file: UploadFile = File(...)):
     job_id = str(uuid.uuid4())
 
-    # Save upload
     ext = os.path.splitext(file.filename or "")[1] or ".mp4"
-    video_path = os.path.join(UPLOAD_DIR, f"{job_id}{ext}")
+    file_bytes = await file.read()
 
-    with open(video_path, "wb") as f:
-        f.write(await file.read())
+    storage_backend = "local"
+    storage_key = os.path.join(UPLOAD_DIR, f"{job_id}{ext}")
+    video_url = f"/videos/{job_id}{ext}"
+
+    if r2_enabled():
+        storage_backend = "r2"
+        storage_key = f"uploads/{job_id}{ext}"
+        upload_bytes(storage_key, file_bytes, file.content_type or "video/mp4")
+        public_url = get_public_url(storage_key)
+        if not public_url:
+            raise HTTPException(
+                status_code=500,
+                detail="R2_PUBLIC_URL not configured for public video access.",
+            )
+        video_url = public_url
+    else:
+        os.makedirs(UPLOAD_DIR, exist_ok=True)
+        with open(storage_key, "wb") as f:
+            f.write(file_bytes)
 
     # Initialize job record
     write_job(job_id, {
@@ -35,11 +56,20 @@ async def upload_video(file: UploadFile = File(...)):
         "status": "queued",
         "progress": 0.0,
         "message": "Queued for processing",
-        "result": None,
+        "result": {
+            "video": {
+                "url": video_url,
+                "filename": f"{job_id}{ext}",
+            }
+        },
+        "storage": {
+            "backend": storage_backend,
+            "key": storage_key,
+        },
     })
 
     # Enqueue background job
-    run_analysis_job.delay(job_id, video_path)
+    run_analysis_job.delay(job_id, storage_backend, storage_key)
 
     return JobCreateResponse(job_id=job_id)
 

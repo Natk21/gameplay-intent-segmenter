@@ -4,6 +4,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function Home() {
+  const previewVideoBase = process.env.NEXT_PUBLIC_PREVIEW_VIDEO_BASE_URL;
+  const previewVideo = previewVideoBase
+    ? (path: string) => `${previewVideoBase.replace(/\/$/, "")}${path}`
+    : null;
+
   return (
     <main className="bg-background text-foreground">
       <div className="mx-auto flex min-h-[calc(100vh-7rem)] max-w-4xl items-center justify-center px-6 py-10">
@@ -48,6 +53,7 @@ export default function Home() {
                 </p>
               </div>
               <MotionPreview
+                src={previewVideo ? previewVideo("/previews/upload.mp4") : undefined}
                 alt="Uploading a gameplay clip for analysis"
               />
             </div>
@@ -55,6 +61,7 @@ export default function Home() {
             <div className="grid gap-6 lg:grid-cols-2 lg:items-center">
               <div className="order-2 lg:order-1">
                 <MotionPreview
+                  src={previewVideo ? previewVideo("/previews/phases.mp4") : undefined}
                   poster="/previews/phases.png"
                   alt="Intent timeline showing explore, execute, and outcome phases"
                 />
@@ -81,6 +88,7 @@ export default function Home() {
                 </p>
               </div>
               <MotionPreview
+                src={previewVideo ? previewVideo("/previews/decision-moments.mp4") : undefined}
                 poster="/previews/decision-moments.png"
                 alt="Decision moments being highlighted in the timeline"
               />
@@ -89,6 +97,7 @@ export default function Home() {
             <div className="grid gap-6 lg:grid-cols-2 lg:items-center">
               <div className="order-2 lg:order-1">
                 <MotionPreview
+                  src={previewVideo ? previewVideo("/previews/signal-analysis.mp4") : undefined}
                   poster="/previews/signal-analysis.png"
                   alt="Signal analysis chart explaining why intent changes were detected"
                 />

@@ -1,9 +1,11 @@
 import os
+import tempfile
 import time
 from typing import Any, Dict, List, Tuple
 
 from app.workers.celery_app import celery_app
 from app.services.job_store import write_job
+from app.services.object_store import download_to_path, get_public_url
 
 from app.services.video_utils import extract_frames, get_video_duration
 from app.services.motion_utils import compute_motion_signal
@@ -203,7 +205,7 @@ def _mark_hesitation(transitions: List[Dict[str, Any]], window_s: float = 2.0):
 # ----------------------------
 
 @celery_app.task
-def run_analysis_job(job_id: str, video_path: str):
+def run_analysis_job(job_id: str, storage_backend: str, storage_key: str):
     """
     Background job that processes an uploaded video.
 
@@ -228,6 +230,14 @@ def run_analysis_job(job_id: str, video_path: str):
         "message": "Starting analysis",
         "result": None,
     })
+
+    # Resolve local video path
+    video_path = storage_key
+    temp_dir = None
+    if storage_backend == "r2":
+        temp_dir = tempfile.TemporaryDirectory()
+        video_path = os.path.join(temp_dir.name, os.path.basename(storage_key))
+        download_to_path(storage_key, video_path)
 
     # 2) Extract frames
     frames_dir = os.path.join("data", "frames", job_id)
@@ -326,11 +336,19 @@ def run_analysis_job(job_id: str, video_path: str):
             "result": None,
         })
     filename = os.path.basename(video_path)
+    if storage_backend == "r2":
+        public_url = get_public_url(storage_key)
+        if public_url:
+            video_url = public_url
+        else:
+            video_url = ""
+    else:
+        video_url = f"/videos/{filename}"
 
     # 7) Final result (stable product schema)
     result = {
         "video": {
-            "url": f"/videos/{filename}",
+            "url": video_url,
             "filename": filename,
             "fps_sampled": fps_used,
             "frames_extracted": frames_extracted,
@@ -365,5 +383,8 @@ def run_analysis_job(job_id: str, video_path: str):
         "message": "Analysis complete",
         "result": result,
     })
+
+    if temp_dir is not None:
+        temp_dir.cleanup()
 
     return True

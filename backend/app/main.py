@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -6,6 +8,8 @@ from fastapi.staticfiles import StaticFiles
 from app.api.routes import router as api_router
 
 app = FastAPI(title="Intent Segmenter API", version="0.1.0")
+
+os.makedirs("data/uploads", exist_ok=True)
 
 app.mount(
     "/videos",
