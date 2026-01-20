@@ -1,3 +1,4 @@
+import logging
 import os
 import tempfile
 import time
@@ -222,169 +223,181 @@ def run_analysis_job(job_id: str, storage_backend: str, storage_key: str):
       - segment ids + explanation fields
     """
 
-    # 1) Mark processing
-    write_job(job_id, {
-        "job_id": job_id,
-        "status": "processing",
-        "progress": 0.1,
-        "message": "Starting analysis",
-        "result": None,
-    })
-
-    # Resolve local video path
-    video_path = storage_key
     temp_dir = None
-    if storage_backend == "r2":
-        temp_dir = tempfile.TemporaryDirectory()
-        video_path = os.path.join(temp_dir.name, os.path.basename(storage_key))
-        download_to_path(storage_key, video_path)
-
-    # 2) Extract frames
-    frames_dir = os.path.join("data", "frames", job_id)
-    frames_extracted, fps_used = extract_frames(
-        video_path=video_path,
-        output_dir=frames_dir,
-        fps=5,
-    )
-    probed_duration_s = get_video_duration(video_path)
-    fallback_duration_s = (
-        frames_extracted / fps_used if fps_used > 0 else 0.0
-    )
-    duration_s = (
-        probed_duration_s
-        if probed_duration_s is not None
-        else fallback_duration_s
-    )
-
-    write_job(job_id, {
-        "job_id": job_id,
-        "status": "processing",
-        "progress": 0.25,
-        "message": f"Extracted {frames_extracted} frames at {fps_used} FPS",
-        "result": None,
-    })
-
-    # 3) Motion signal
-    motion_t, motion_signal, interaction_signal, entropy_signal = compute_motion_signal(
-        frames_dir,
-        fps_used=fps_used
-    )
-
-    write_job(job_id, {
-        "job_id": job_id,
-        "status": "processing",
-        "progress": 0.45,
-        "message": "Computed motion signal",
-        "result": None,
-    })
-
-    # 4) Smooth motion
-    smoothed_motion = smooth_signal(motion_signal, window_size=5)
-
-    write_job(job_id, {
-        "job_id": job_id,
-        "status": "processing",
-        "progress": 0.60,
-        "message": "Smoothed motion signal",
-        "result": None,
-    })
-
-    # 5) Segment phases
-    segments = segment_intent_phases(
-        motion_t,
-        smoothed_motion,
-        interaction=interaction_signal,
-        entropy=entropy_signal
-    )
-
-    # Ensure UI-friendly shape (without changing real segmentation)
-    segments = _ensure_segment_ids_and_fields(segments)
-
-
-    write_job(job_id, {
-        "job_id": job_id,
-        "status": "processing",
-        "progress": 0.75,
-        "message": f"Segmented into {len(segments)} phases",
-        "result": None,
-    })
-
-    # 6) Insights + metrics
-    # Your existing compute_intent_insights likely returns headline + avg segment duration etc.
-    insights = compute_intent_insights(segments)
-
-    # Add phase distribution + top-level metrics in stable places
-    phase_distribution = _phase_distribution_from_segments(segments)
-    transitions = _segments_to_transitions(
-        segments,
-        signals={
-            "t": motion_t,
-            "motion_smooth": smoothed_motion,
-        }
-    )
-    _mark_hesitation(transitions)
-    metrics = _compute_metrics(segments, transitions)
-
-    # Optional: simulate extra work (keeps UI animation / progress feeling alive)
-    for i in range(8, 10):
-        time.sleep(0.2)
+    try:
+        # 1) Mark processing
         write_job(job_id, {
             "job_id": job_id,
             "status": "processing",
-            "progress": i / 10.0,
-            "message": "Finalizing results...",
+            "progress": 0.1,
+            "message": "Starting analysis",
             "result": None,
         })
-    filename = os.path.basename(video_path)
-    if storage_backend == "r2":
-        public_url = get_public_url(storage_key)
-        if public_url:
-            video_url = public_url
+
+        # Resolve local video path
+        video_path = storage_key
+        if storage_backend == "r2":
+            temp_dir = tempfile.TemporaryDirectory()
+            video_path = os.path.join(
+                temp_dir.name, os.path.basename(storage_key)
+            )
+            download_to_path(storage_key, video_path)
+
+        # 2) Extract frames
+        frames_dir = os.path.join("data", "frames", job_id)
+        frames_extracted, fps_used = extract_frames(
+            video_path=video_path,
+            output_dir=frames_dir,
+            fps=5,
+        )
+        probed_duration_s = get_video_duration(video_path)
+        fallback_duration_s = (
+            frames_extracted / fps_used if fps_used > 0 else 0.0
+        )
+        duration_s = (
+            probed_duration_s
+            if probed_duration_s is not None
+            else fallback_duration_s
+        )
+
+        write_job(job_id, {
+            "job_id": job_id,
+            "status": "processing",
+            "progress": 0.25,
+            "message": f"Extracted {frames_extracted} frames at {fps_used} FPS",
+            "result": None,
+        })
+
+        # 3) Motion signal
+        motion_t, motion_signal, interaction_signal, entropy_signal = compute_motion_signal(
+            frames_dir,
+            fps_used=fps_used
+        )
+
+        write_job(job_id, {
+            "job_id": job_id,
+            "status": "processing",
+            "progress": 0.45,
+            "message": "Computed motion signal",
+            "result": None,
+        })
+
+        # 4) Smooth motion
+        smoothed_motion = smooth_signal(motion_signal, window_size=5)
+
+        write_job(job_id, {
+            "job_id": job_id,
+            "status": "processing",
+            "progress": 0.60,
+            "message": "Smoothed motion signal",
+            "result": None,
+        })
+
+        # 5) Segment phases
+        segments = segment_intent_phases(
+            motion_t,
+            smoothed_motion,
+            interaction=interaction_signal,
+            entropy=entropy_signal
+        )
+
+        # Ensure UI-friendly shape (without changing real segmentation)
+        segments = _ensure_segment_ids_and_fields(segments)
+
+
+        write_job(job_id, {
+            "job_id": job_id,
+            "status": "processing",
+            "progress": 0.75,
+            "message": f"Segmented into {len(segments)} phases",
+            "result": None,
+        })
+
+        # 6) Insights + metrics
+        # Your existing compute_intent_insights likely returns headline + avg segment duration etc.
+        insights = compute_intent_insights(segments)
+
+        # Add phase distribution + top-level metrics in stable places
+        phase_distribution = _phase_distribution_from_segments(segments)
+        transitions = _segments_to_transitions(
+            segments,
+            signals={
+                "t": motion_t,
+                "motion_smooth": smoothed_motion,
+            }
+        )
+        _mark_hesitation(transitions)
+        metrics = _compute_metrics(segments, transitions)
+
+        # Optional: simulate extra work (keeps UI animation / progress feeling alive)
+        for i in range(8, 10):
+            time.sleep(0.2)
+            write_job(job_id, {
+                "job_id": job_id,
+                "status": "processing",
+                "progress": i / 10.0,
+                "message": "Finalizing results...",
+                "result": None,
+            })
+        filename = os.path.basename(video_path)
+        if storage_backend == "r2":
+            public_url = get_public_url(storage_key)
+            if public_url:
+                video_url = public_url
+            else:
+                video_url = ""
         else:
-            video_url = ""
-    else:
-        video_url = f"/videos/{filename}"
+            video_url = f"/videos/{filename}"
 
-    # 7) Final result (stable product schema)
-    result = {
-        "video": {
-            "url": video_url,
-            "filename": filename,
-            "fps_sampled": fps_used,
-            "frames_extracted": frames_extracted,
-            "duration_s": round(duration_s, 3),
-        },
+        # 7) Final result (stable product schema)
+        result = {
+            "video": {
+                "url": video_url,
+                "filename": filename,
+                "fps_sampled": fps_used,
+                "frames_extracted": frames_extracted,
+                "duration_s": round(duration_s, 3),
+            },
 
-        # insights stays, but we enhance it with distribution so UI doesn't recompute
-        "summary": {
-            **(insights or {}),
-            "phase_distribution": phase_distribution,
-        },
+            # insights stays, but we enhance it with distribution so UI doesn't recompute
+            "summary": {
+                **(insights or {}),
+                "phase_distribution": phase_distribution,
+            },
 
-        # stable metrics block for UI panels
-        "metrics": metrics,
+            # stable metrics block for UI panels
+            "metrics": metrics,
 
-        # segments + transitions are now first-class
-        "segments": segments,
-        "transitions": transitions,
+            # segments + transitions are now first-class
+            "segments": segments,
+            "transitions": transitions,
 
-        # signals are still included (great for charts/debug)
-        "signals": {
-            "t": motion_t,
-            "motion_raw": motion_signal,
-            "motion_smooth": smoothed_motion,
-        },
-    }
+            # signals are still included (great for charts/debug)
+            "signals": {
+                "t": motion_t,
+                "motion_raw": motion_signal,
+                "motion_smooth": smoothed_motion,
+            },
+        }
 
-    write_job(job_id, {
-        "job_id": job_id,
-        "status": "done",
-        "progress": 1.0,
-        "message": "Analysis complete",
-        "result": result,
-    })
-
-    if temp_dir is not None:
-        temp_dir.cleanup()
-
-    return True
+        write_job(job_id, {
+            "job_id": job_id,
+            "status": "done",
+            "progress": 1.0,
+            "message": "Analysis complete",
+            "result": result,
+        })
+        return True
+    except Exception as exc:
+        logging.exception("Job %s failed during analysis", job_id)
+        write_job(job_id, {
+            "job_id": job_id,
+            "status": "error",
+            "progress": 0.0,
+            "message": f"Analysis failed: {type(exc).__name__}: {exc}",
+            "result": None,
+        })
+        return False
+    finally:
+        if temp_dir is not None:
+            temp_dir.cleanup()
