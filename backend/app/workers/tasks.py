@@ -13,6 +13,12 @@ from app.services.motion_utils import compute_motion_signal
 from app.services.signal_utils import smooth_signal
 from app.services.intent_segmentation import segment_intent_phases
 from app.services.intent_insights import compute_intent_insights
+from app.ml.features.audio_features import compute_audio_features
+from app.services.learned_intent_segmentation import (
+    align_signal,
+    load_default_model_bundle,
+    segment_intent_phases_model,
+)
 
 
 # ----------------------------
@@ -262,7 +268,7 @@ def run_analysis_job(job_id: str, storage_backend: str, storage_key: str):
         frames_extracted, fps_used = extract_frames(
             video_path=video_path,
             output_dir=frames_dir,
-            fps=5,
+            fps=15,
         )
         probed_duration_s = get_video_duration(video_path)
         fallback_duration_s = (
@@ -288,6 +294,17 @@ def run_analysis_job(job_id: str, storage_backend: str, storage_key: str):
             fps_used=fps_used
         )
 
+        try:
+            audio_t, audio_energy, audio_flux = compute_audio_features(
+                audio_path=video_path,
+                fps=float(fps_used),
+            )
+        except Exception:
+            audio_t, audio_energy, audio_flux = [], [], []
+
+        audio_energy = align_signal(motion_t, audio_t, audio_energy)
+        audio_flux = align_signal(motion_t, audio_t, audio_flux)
+
         write_job(job_id, {
             "job_id": job_id,
             "status": "processing",
@@ -308,12 +325,24 @@ def run_analysis_job(job_id: str, storage_backend: str, storage_key: str):
         })
 
         # 5) Segment phases
-        segments = segment_intent_phases(
-            motion_t,
-            smoothed_motion,
-            interaction=interaction_signal,
-            entropy=entropy_signal
-        )
+        model_bundle = load_default_model_bundle()
+        if model_bundle is not None:
+            segments = segment_intent_phases_model(
+                motion_t,
+                motion_signal,
+                interaction_signal,
+                entropy_signal,
+                audio_energy,
+                audio_flux,
+                model_bundle,
+            )
+        else:
+            segments = segment_intent_phases(
+                motion_t,
+                smoothed_motion,
+                interaction=interaction_signal,
+                entropy=entropy_signal
+            )
 
         # Ensure UI-friendly shape (without changing real segmentation)
         segments = _ensure_segment_ids_and_fields(segments)
@@ -391,6 +420,10 @@ def run_analysis_job(job_id: str, storage_backend: str, storage_key: str):
                 "t": motion_t,
                 "motion_raw": motion_signal,
                 "motion_smooth": smoothed_motion,
+                "interaction": interaction_signal,
+                "entropy": entropy_signal,
+                "audio_energy": audio_energy,
+                "audio_flux": audio_flux,
             },
         }
 

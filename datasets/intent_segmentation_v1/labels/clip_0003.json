@@ -1,0 +1,29 @@
+{
+  "clip_id": "clip_0003",
+  "source_clip_id": "clip_3",
+  "fps": 30.0,
+  "duration_s": 100.0,
+  "segments": [
+    { "start": 0.0, "end": 4.2, "phase": "Explore" },
+    { "start": 4.2, "end": 5.8, "phase": "Pursue" },
+    { "start": 5.8, "end": 8.5, "phase": "Execute" },
+    { "start": 8.5, "end": 9.8, "phase": "Outcome" },
+    { "start": 9.8, "end": 11.2, "phase": "Execute" },
+    { "start": 11.2, "end": 17.5, "phase": "Explore" },
+    { "start": 17.5, "end": 20.1, "phase": "Pursue" },
+    { "start": 20.1, "end": 26.3, "phase": "Execute" },
+    { "start": 26.3, "end": 30.8, "phase": "Outcome" },
+    { "start": 30.8, "end": 45.1, "phase": "Explore" },
+    { "start": 45.1, "end": 47.5, "phase": "Execute" },
+    { "start": 47.5, "end": 52.3, "phase": "Explore" },
+    { "start": 52.3, "end": 57.8, "phase": "Execute" },
+    { "start": 57.8, "end": 63.4, "phase": "Outcome" },
+    { "start": 63.4, "end": 75.0, "phase": "Explore" },
+    { "start": 75.0, "end": 77.2, "phase": "Pursue" },
+    { "start": 77.2, "end": 82.0, "phase": "Execute" },
+    { "start": 82.0, "end": 85.5, "phase": "Outcome" },
+    { "start": 85.5, "end": 95.2, "phase": "Explore" },
+    { "start": 95.2, "end": 98.1, "phase": "Pursue" },
+    { "start": 98.1, "end": 100.0, "phase": "Execute" }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "clip_id": "clip_0007",
+  "source_clip_id": "clip_7",
+  "fps": 30.0,
+  "duration_s": 12.0,
+  "segments": [
+    { "start": 0.0, "end": 5.0, "phase": "Explore" },
+    { "start": 5.0, "end": 10.0, "phase": "Pursue" },
+    { "start": 10.0, "end": 12.0, "phase": "Outcome" }
+  ]
+}

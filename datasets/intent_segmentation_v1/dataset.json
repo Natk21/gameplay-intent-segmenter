@@ -1,0 +1,85 @@
+{
+  "dataset_id": "intent_segmentation_v1",
+  "label_format": "segments_v1",
+  "phases": ["Explore", "Pursue", "Execute", "Outcome"],
+  "items": [
+    {
+      "clip_id": "clip_0001",
+      "labels_path": "labels/clip_0001.json",
+      "notes_path": "notes/clip_0001.md",
+      "media_path": "media/clip 1.mp4"
+    },
+    {
+      "clip_id": "clip_0002",
+      "labels_path": "labels/clip_0002.json",
+      "notes_path": "notes/clip_0002.md",
+      "media_path": "media/clip 2.mp4"
+    },
+    {
+      "clip_id": "clip_0003",
+      "labels_path": "labels/clip_0003.json",
+      "notes_path": "notes/clip_0003.md",
+      "media_path": "media/clip 3.mp4"
+    },
+    {
+      "clip_id": "clip_0004",
+      "labels_path": "labels/clip_0004.json",
+      "notes_path": "notes/clip_0004.md",
+      "media_path": "media/clip 4.mp4"
+    },
+    {
+      "clip_id": "clip_0005",
+      "labels_path": "labels/clip_0005.json",
+      "notes_path": null,
+      "media_path": "media/clip 5.mp4"
+    },
+    {
+      "clip_id": "clip_0006",
+      "labels_path": "labels/clip_0006.json",
+      "notes_path": null,
+      "media_path": "media/clip 6.mp4"
+    },
+    {
+      "clip_id": "clip_0007",
+      "labels_path": "labels/clip_0007.json",
+      "notes_path": null,
+      "media_path": "media/clip 7.mp4"
+    },
+    {
+      "clip_id": "clip_0008",
+      "labels_path": "labels/clip_0008.json",
+      "notes_path": null,
+      "media_path": "media/clip 8.mp4"
+    },
+    {
+      "clip_id": "clip_0009",
+      "labels_path": "labels/clip_0009.json",
+      "notes_path": null,
+      "media_path": "media/clip 9.mp4"
+    },
+    {
+      "clip_id": "clip_0010",
+      "labels_path": "labels/clip_0010.json",
+      "notes_path": null,
+      "media_path": "media/clip 10.mp4"
+    },
+    {
+      "clip_id": "clip_0011",
+      "labels_path": "labels/clip_0011.json",
+      "notes_path": null,
+      "media_path": "media/clip 11.mp4"
+    },
+    {
+      "clip_id": "clip_0012",
+      "labels_path": "labels/clip_0012.json",
+      "notes_path": null,
+      "media_path": "media/clip 12.mp4"
+    },
+    {
+      "clip_id": "clip_0013",
+      "labels_path": "labels/clip_0013.json",
+      "notes_path": null,
+      "media_path": "media/clip 13.mp4"
+    }
+  ]
+}

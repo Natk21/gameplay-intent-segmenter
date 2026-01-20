@@ -1,0 +1,9 @@
+{
+  "clip_id": "clip_0005",
+  "source_clip_id": "clip_5",
+  "fps": 30.0,
+  "duration_s": 30.0,
+  "segments": [
+    { "start": 0.0, "end": 30.0, "phase": "Explore" }
+  ]
+}

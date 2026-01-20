@@ -1,0 +1,16 @@
+{
+  "clip_id": "clip_0001",
+  "source_clip_id": "clip_1",
+  "fps": 30,
+  "duration_s": 35.31,
+  "segments": [
+    { "start": 0.0, "end": 4.8, "phase": "Pursue" },
+    { "start": 4.8, "end": 6.4, "phase": "Execute" },
+    { "start": 6.4, "end": 9.8, "phase": "Outcome" },
+    { "start": 9.8, "end": 18.7, "phase": "Explore" },
+    { "start": 18.7, "end": 23.1, "phase": "Pursue" },
+    { "start": 23.1, "end": 25.4, "phase": "Execute" },
+    { "start": 25.4, "end": 28.6, "phase": "Outcome" },
+    { "start": 28.6, "end": 35.31, "phase": "Explore" }
+  ]
+}

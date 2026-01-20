@@ -8,3 +8,6 @@ numpy==2.1.3
 opencv-python-headless==4.12.0.88
 pydantic==2.10.6
 boto3
+lightgbm
+librosa
+soundfile

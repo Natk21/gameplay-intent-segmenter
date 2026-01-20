@@ -1,0 +1,21 @@
+{
+  "clip_id": "clip_0008",
+  "source_clip_id": "clip_8",
+  "fps": 30.0,
+  "duration_s": 30.0,
+  "segments": [
+    { "start": 0.0, "end": 2.0, "phase": "Explore" },
+    { "start": 2.0, "end": 3.0, "phase": "Execute" },
+    { "start": 3.0, "end": 7.0, "phase": "Outcome" },
+    { "start": 7.0, "end": 9.0, "phase": "Execute" },
+    { "start": 9.0, "end": 10.0, "phase": "Outcome" },
+    { "start": 10.0, "end": 13.0, "phase": "Pursue" },
+    { "start": 13.0, "end": 14.0, "phase": "Execute" },
+    { "start": 14.0, "end": 16.0, "phase": "Outcome" },
+    { "start": 16.0, "end": 17.0, "phase": "Pursue" },
+    { "start": 17.0, "end": 18.0, "phase": "Execute" },
+    { "start": 18.0, "end": 19.0, "phase": "Outcome" },
+    { "start": 19.0, "end": 25.0, "phase": "Pursue" },
+    { "start": 25.0, "end": 30.0, "phase": "Explore" }
+  ]
+}
