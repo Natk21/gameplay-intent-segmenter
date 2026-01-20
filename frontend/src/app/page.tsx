@@ -55,6 +55,7 @@ export default function Home() {
               <MotionPreview
                 src={previewVideo ? previewVideo("/previews/upload.mp4") : undefined}
                 alt="Uploading a gameplay clip for analysis"
+                forceVideo
               />
             </div>
 
@@ -64,6 +65,7 @@ export default function Home() {
                   src={previewVideo ? previewVideo("/previews/phases.mp4") : undefined}
                   poster="/previews/phases.png"
                   alt="Intent timeline showing explore, execute, and outcome phases"
+                  forceVideo
                 />
               </div>
               <div className="order-1 space-y-3 lg:order-2">
@@ -91,6 +93,7 @@ export default function Home() {
                 src={previewVideo ? previewVideo("/previews/decision-moments.mp4") : undefined}
                 poster="/previews/decision-moments.png"
                 alt="Decision moments being highlighted in the timeline"
+                forceVideo
               />
             </div>
 
@@ -100,6 +103,7 @@ export default function Home() {
                   src={previewVideo ? previewVideo("/previews/signal-analysis.mp4") : undefined}
                   poster="/previews/signal-analysis.png"
                   alt="Signal analysis chart explaining why intent changes were detected"
+                  forceVideo
                 />
               </div>
               <div className="order-1 space-y-3 lg:order-2">

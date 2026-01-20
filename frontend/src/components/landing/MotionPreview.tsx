@@ -6,9 +6,15 @@ type MotionPreviewProps = {
   src?: string;
   poster?: string;
   alt: string;
+  forceVideo?: boolean;
 };
 
-export default function MotionPreview({ src, poster, alt }: MotionPreviewProps) {
+export default function MotionPreview({
+  src,
+  poster,
+  alt,
+  forceVideo = false,
+}: MotionPreviewProps) {
   const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -38,7 +44,9 @@ export default function MotionPreview({ src, poster, alt }: MotionPreviewProps) 
   const sharedClassName =
     "w-full h-auto rounded-xl border border-white/10 shadow-lg bg-black/40";
 
-  if (reducedMotion || !src) {
+  const shouldReduceMotion = reducedMotion && !forceVideo;
+
+  if (shouldReduceMotion || !src) {
     if (poster) {
       return (
         <img
