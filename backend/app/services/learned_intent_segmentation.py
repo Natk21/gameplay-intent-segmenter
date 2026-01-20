@@ -1,9 +1,8 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
-import lightgbm as lgb
 import numpy as np
 
 from app.ml.sequence.viterbi import (
@@ -15,7 +14,7 @@ from app.ml.sequence.viterbi import (
 
 @dataclass
 class ModelBundle:
-    model: lgb.Booster
+    model: Any
     phases: List[str]
 
 
@@ -41,6 +40,11 @@ def load_model_bundle(
         metadata = json.load(handle)
     phases = metadata.get("phases", [])
     if not phases:
+        return None
+
+    try:
+        import lightgbm as lgb
+    except Exception:
         return None
 
     model = lgb.Booster(model_file=str(model_path))
